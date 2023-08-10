@@ -1,116 +1,200 @@
-import ManagerProducts from '../daos/mongodb/ProductsManager.class.js'
+// Import de ProductService:
+import ProductService from '../services/products.service.js';
 
-const managerProducts = new ManagerProducts();
+// Import mongoose para validación de IDs:
+import mongoose from 'mongoose';
 
-export const consultarProductoPorId = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const product = await managerProducts.consultarProductoPorId(id);
-        if (!product) {
-            console.log(`No se encontró ningún producto con el ID ${id}.`)
-            res.status(404).json({
-                error: `No se encontró ningún producto con el ID ${id}.`
-            });
-        } else {
-            res.send({
-                product
+// Clase para el Controller de productos: 
+export default class ProductController {
+
+    constructor() {
+        // Instancia de ProductService:
+        this.productService = new ProductService();
+    }
+
+    // Métodos para ProductController:
+
+    // Crear un producto - Controller:
+    async createProductController(req, res) {
+        let response = {};
+        try {
+            const productData = req.body;
+            if (!productData) {
+                response.status = "error";
+                response.message = `No se proporcionó ningún cuerpo para el producto.`;
+                response.statusCode = 400;
+            } else {
+                const responseService = await this.productService.createProductService(productData);
+                response.status = responseService.status;
+                response.message = responseService.message;
+                response.statusCode = responseService.statusCode;
+                if (responseService.status === "success") {
+                    response.result = responseService.result;
+                    // Actualización Real Time: 
+                    const products = await this.productService.getAllProductsService();
+                    req.socketServer.sockets.emit('productos', products);
+                }
+                if (responseService.status === "error") {
+                    response.error = responseService.error;
+                }
+            }
+            console.log(response);
+            return response
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.status(500).json({
+                error: "Error al crear el producto: " + error.message
             });
         }
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            error: 'Error al consultar el producto.'
-        });
-    }
-};
+    };
 
-export const consultarProductos = async (req, res) => {
-    try {
-        const limit = Number(req.query.limit) || 10;
-        const page = Number(req.query.page) || 1;
-        let sort = Number(req.query.sort) || 1;
-        let filtro = req.query.filtro || null;
-        let filtroVal = req.query.filtroVal || null;
-
-        const data = await managerProducts.consultarProductos(limit, page, sort, filtro, filtroVal);
-
-        res.send(data);
-        console.log(data.products.docs);
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            error: 'Error al consultar los productos.'
-        });
-    }
-};
-
-export const crearProducto = async (req, res) => {
-    try {
-        const productData = req.body;
-        const createdProduct = await managerProducts.crearProducto(productData);
-
-        // Actualización Real Time: 
-        const products = await managerProducts.consultarProductos();
-        req.socketServer.sockets.emit('productos', products);
-
-        res.send({
-            product: createdProduct
-        });
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            error: 'Error al crear el producto.'
-        });
-    }
-};
-
-export const actualizarProducto = async (req, res) => {
-    try {
-        const pid = req.params.pid;
-        const updatedFields = req.body;
-        const updatedProduct = await managerProducts.actualizarProducto(pid, updatedFields);
-
-        // Actualización Real Time: 
-        const products = await managerProducts.consultarProductos();
-        req.socketServer.sockets.emit('productos', products);
-
-        if (!updatedProduct) {
-            console.log(`No se encontró ningún producto con el ID ${pid}.`)
-            res.status(404).json({
-                error: `No se encontró ningún producto con el ID ${pid}.`
+    // Traer un producto por ID - Controller:
+    async getProductByIDController(req, res) {
+        let response = {};
+        try {
+            const pid = req.params.pid;
+            if (!pid) {
+                response.status = "error";
+                response.message = `No se proporcionó ningún ID de producto.`;
+                response.statusCode = 400;
+            } else if (!mongoose.Types.ObjectId.isValid(pid)) {
+                response.status = "error";
+                response.message = `El ID proporcionado no es válido.`;
+                response.statusCode = 400;
+            } else {
+                const responseService = await this.productService.getProductByIdService(pid);
+                response.status = responseService.status;
+                response.message = responseService.message;
+                response.statusCode = responseService.statusCode;
+                if (responseService.status === "success") {
+                    response.result = responseService.result;
+                }
+                if (responseService.status === "error") {
+                    response.error = responseService.error;
+                }
+            }
+            console.log(response);
+            return response
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.status(500).json({
+                error: 'Error al consultar el producto: ' + error.message
             });
-        } else {
-            res.send(updatedProduct);
         }
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            error: 'Error al actualizar el producto.'
-        });
-    }
-};
+    };
 
-export const eliminarProducto = async (req, res) => {
-    try {
-        const pid = req.params.pid;
-        const result = await managerProducts.eliminarProducto(pid);
-        if (!result) {
-            console.log(`No se encontró ningún producto con el ID ${pid}.`)
-            res.status(404).json({
-                error: `No se encontró ningún producto con el ID ${pid}.`
+    // Traer todos los productos - Controller: 
+    async getAllProductsController(req, res) {
+        let response = {};
+        try {
+            const limit = Number(req.query.limit) || 10;
+            const page = Number(req.query.page) || 1;
+            let sort = Number(req.query.sort) || 1;
+            let filtro = req.query.filtro || null;
+            let filtroVal = req.query.filtroVal || null;
+
+            const responseService = await this.productService.getAllProductsService(limit, page, sort, filtro, filtroVal);
+            response.status = responseService.status;
+            response.message = responseService.message;
+            response.statusCode = responseService.statusCode;
+            if (responseService.status === "success") {
+                response.result = responseService.result;
+                response.hasNextPage = responseService.hasNextPage;
+            }
+            if (responseService.status === "error") {
+                response.error = responseService.error;
+            }
+            console.log(response);
+            return response;
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.status(500).json({
+                error: "Error al obtener los productos: " + error.message
             });
-        } else {
-
-            // Actualización Real Time: 
-            const products = await managerProducts.consultarProductos();
-            req.socketServer.sockets.emit('productos', products);
-
-            res.send(result);
         }
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            error: 'Error al eliminar el producto.'
-        });
+    };
+
+    // Eliminar un producto por su ID - Controller:
+    async deleteProductController(req, res) {
+        let response = {};
+        try {
+            const pid = req.params.pid;
+            if (!pid) {
+                response.status = "error";
+                response.message = `No se proporcionó ningún ID de producto.`;
+                response.statusCode = 400;
+            } else if (!mongoose.Types.ObjectId.isValid(pid)) {
+                response.status = "error";
+                response.message = `El ID proporcionado no es válido.`;
+                response.statusCode = 400;
+            } else {
+                const responseService = await this.productService.deleteProductService(pid);
+                response.status = responseService.status;
+                response.message = responseService.message;
+                response.statusCode = responseService.statusCode;
+                if (responseService.status === "success") {
+                    response.result = responseService.result;
+                    // Actualización Real Time: 
+                    const products = await this.productService.getAllProductsService();
+                    req.socketServer.sockets.emit('productos', products);
+                }
+                if (responseService.status === "error") {
+                    response.error = responseService.error;
+                }
+            }
+            console.log(response);
+            return response
+        } catch (error) {
+            console.error('Error: ', error.message);
+            res.status(500).json({
+                error: "Error al eliminar el producto: " + error.message
+            });
+        }
     }
-};
+
+    // Actualizar un producto - Controller: 
+    async updatedProductController(req, res) {
+        let response = {};
+        try {
+            const pid = req.params.pid;
+            const updatedFields = req.body;
+            if (!pid) {
+                response.status = "error";
+                response.message = `No se proporcionó ningún ID de producto.`;
+                response.statusCode = 400;
+            }
+            if (!mongoose.Types.ObjectId.isValid(pid)) {
+                response.status = "error";
+                response.message = `El ID proporcionado no es válido.`;
+                response.statusCode = 400;
+            }
+            if (!updatedFields) {
+                response.status = "error";
+                response.message = `No se proporcionó ningún cuerpo para el producto.`;
+                response.statusCode = 400;
+            } else {
+                const responseService = await this.productService.updateProductService(pid, updatedFields);
+                response.status = responseService.status;
+                response.message = responseService.message;
+                response.statusCode = responseService.statusCode;
+                if (responseService.status === "success") {
+                    response.result = responseService.result;
+                    // Actualización Real Time: 
+                    const products = await this.productService.getAllProductsService();
+                    req.socketServer.sockets.emit('productos', products)
+                }
+                if (responseService.status === "error") {
+                    response.error = responseService.error;
+                }
+            }
+            console.log(response);
+            return response
+        } catch (error) {
+            console.error('Error: ', error.message);
+            res.status(500).json({
+                error: "Error al eliminar el producto: " + error.message
+            });
+        }
+    }
+
+}

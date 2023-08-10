@@ -2,93 +2,122 @@
 import mongoose from "mongoose";
 
 // Import del modelo de carritos:
-import { cartModel } from "./models/carts.model.js";
+import {
+    cartModel
+} from "./models/carts.model.js";
 
 // Import de variables de entorno:
-import { envMongoURL } from "../../config.js";
+import {
+    envMongoURL
+} from "../../config.js";
 
-// Clase para el DAO de carrito:
+// Clase para el DAO de carritos:
 export default class CartsDAO {
 
     // Conexión Mongoose:
-    connection = mongoose.connect( envMongoURL );
+    connection = mongoose.connect(envMongoURL);
 
-    // Crear un carrito:
+    // Crear un carrito - DAO:
     async createCart() {
-        const result = await cartModel.create({
-            products: []
-        });
-        return {
-            status: "success",
-            result
+        try {
+            const result = await cartModel.create({
+                products: []
+            });
+            return result;
+        } catch (error) {
+            throw new Error("Error al crear el carrito - DAO. Error original: " + error.message);
         };
     };
 
-    // Traer un carrito por su ID:
-    async getCartById(id) {
-        const result = await cartModel.findOne({_id: id}).populate('products.product');
-        return result;
+    // Traer un carrito por su ID - DAO:
+    async getCartById(cid) {
+        try {
+            const result = await cartModel.findOne({_id: cid}).populate('products.product');
+            return result;
+        } catch (error) {
+            throw new Error("Error al obtener el carrito por ID - DAO. Error original: " + error.message);
+        };
     };
-    
-    // Traer todos los carritos: 
+
+    // Traer todos los carritos - DAO: 
     async getAllCarts() {
-        const result = await cartModel.find();
-        return result;
+        try {
+            const result = await cartModel.find();
+            return result;
+        } catch (error) {
+            throw new Error("Error al obtener todos los carritos - DAO. Error original: " + error.message);
+        };
     };
 
     // Agregar un producto a un carrito:
     async addProductToCart(cid, product) {
-        const cart = await this.getCartById(cid);
-        cart.products.push({ product: product });
-        await cart.save();
-        return {
-            status: 'success'
+        try {
+            const cart = await this.getCartById(cid);
+            cart.products.push({
+                product: product
+            });
+            await cart.save();
+            return cart
+        } catch (error) {
+            throw new Error("Error al agregar el producto al carrito - DAO. Original error: " + error.message);
         };
     };
 
     // Borrar un producto de un carrito: 
     async deleteProductFromCart(cid, pid) {
-        const cart = await this.getCartById(cid);
-        cart.products.pull(pid);
-        await cart.save();
-        return {
-            status: 'success'
-        };
-    };
+        try {
+            const cart = await this.getCartById(cid);
+            cart.products.pull(pid);
+            await cart.save();
+            return {
+                status: 'success'
+            };
+        } catch (error) {
+            throw new Error("Error al borrar el producto en carrito - DAO. Original error: " + error.message);
+        }
+    }
 
     // Borrar todos los productos de un carrito: 
     async deleteAllProductsFromCart(cid) {
-        const cart = await this.getCartById(cid);
-        cart.products = [];
-        await cart.save();
-        return {
-            status: 'success'
-        };
-    };
+        try {
+            const cart = await this.getCartById(cid);
+            cart.products = [];
+            await cart.save();
+            return {
+                status: 'success'
+            };
+        } catch (error) {
+            throw new Error("Error al borrar todos los productos en carrito - DAO. Original error: " + error.message);
+        }
+    }
 
     // Actualizar un carrito:
     async updateCart(cid, updatedCartFields) {
-        let result = await cartModel.updateOne({
-            _id: cid
-        }, {
-            $set: updatedCartFields
-        });
-        return {
-            status: 'success',
-            result
-        };
-    };
+        try {
+            let result = await cartModel.updateOne({
+                _id: cid
+            }, {
+                $set: updatedCartFields
+            });
+            return result;
+        } catch (error) {
+            throw new Error("Error al actualizar el carrito - DAO. Original error: " + error.message);
+        }
+    }
 
     // Actualizar la cantidad de un produco en carrito: 
     async updateProductToCart(cid, pid, updatedProdInCart) {
-        const cart = await this.getCartById(cid);
-        const product = cart.products.find((p) => p._id.toString() === pid);
-        product.quantity = updatedProdInCart.quantity;
-        await cart.save();
-        return {
-            status: 'success',
-            cart
-        };
-    };
+        try {
+            const cart = await this.getCartById(cid);
+            const product = cart.products.find((p) => p._id.toString() === pid);
+            product.quantity = updatedProdInCart.quantity;
+            await cart.save();
+            return {
+                cart
+            };
+        } catch (error) {
+            throw new Error("Error al actualizar producto en carrito. Original error: " + error.message);
+        }
+    }
 
 }

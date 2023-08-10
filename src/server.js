@@ -13,9 +13,9 @@ import sessionRouter from './routes/session.router.js'
 import viewsRouter from "./routes/views.router.js";
 
 // Importación de managers:
-import ManagerProducts from './daos/mongodb/ProductsManager.class.js';
-import ManagerMessage from './daos/mongodb/MessagesManager.class.js';
-import ManagerCarts from './daos/mongodb/CartManager.class.js';
+import ManagerProducts from './DAO/mongodb/ProductsManager.class.js';
+import ManagerMessage from './DAO/mongodb/MessagesManager.class.js';
+import ManagerCarts from './DAO/mongodb/CartManager.class.js';
 // import { logout } from './public/js/profile.js';
 
 // Importación de configuraciones de Passport:

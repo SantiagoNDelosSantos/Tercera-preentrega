@@ -1,4 +1,4 @@
-import ManagerMessage from '../daos/mongodb/MessagesManager.class.js';
+import ManagerMessage from '../DAO/mongodb/MessagesManager.class.js';
 
 const managerMessage = new ManagerMessage();
 

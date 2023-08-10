@@ -1,8 +1,8 @@
 import passport from 'passport';
 import local from 'passport-local';
-import userModel from '../daos/mongodb/models/users.model.js';
+import userModel from '../DAO/mongodb/models/users.model.js';
 import { createHash, isValidPassword } from '../utils.js';
-import ManagerCarts from '../daos/mongodb/CartManager.class.js';
+import ManagerCarts from '../DAO/mongodb/CartManager.class.js';
 
 const localStrategy = local.Strategy;
 const managerCarts = new ManagerCarts();

@@ -14,6 +14,7 @@ export default class ManagerCarts {
 
     productManager = new ManagerProducts();
 
+    
     async crearCart() {
         const result = await cartModel.create({
             products: []
@@ -21,6 +22,7 @@ export default class ManagerCarts {
         return result;
     };
 
+    
     async consultarCartPorId(id) {
         const result = await cartModel.findOne({_id: id}).populate('products.product');
         return result;

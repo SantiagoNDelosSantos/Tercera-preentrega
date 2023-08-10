@@ -2,8 +2,8 @@
 
 import passport from 'passport';
 import { Strategy as GitHubStrategy} from 'passport-github2';
-import userModel from '../daos/mongodb/models/users.model.js';
-import ManagerCarts from '../daos/mongodb/CartManager.class.js';
+import userModel from '../DAO/mongodb/models/users.model.js';
+import ManagerCarts from '../DAO/mongodb/CartManager.class.js';
 
 // Importación de variables de entorno:
 import { envClientID, envClientSecret, envCallbackURL } from '../config.js';
