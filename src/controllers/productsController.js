@@ -100,10 +100,10 @@ export default class ProductController {
             if (responseService.status === "success") {
                 response.result = responseService.result;
                 response.hasNextPage = responseService.hasNextPage;
-            }
+            };
             if (responseService.status === "error") {
                 response.error = responseService.error;
-            }
+            };
             console.log(response);
             return response;
         } catch (error) {
@@ -137,11 +137,11 @@ export default class ProductController {
                     // Actualización Real Time: 
                     const products = await this.productService.getAllProductsService();
                     req.socketServer.sockets.emit('productos', products);
-                }
+                };
                 if (responseService.status === "error") {
                     response.error = responseService.error;
-                }
-            }
+                };
+            };
             console.log(response);
             return response
         } catch (error) {
@@ -149,8 +149,8 @@ export default class ProductController {
             res.status(500).json({
                 error: "Error al eliminar el producto: " + error.message
             });
-        }
-    }
+        };
+    };
 
     // Actualizar un producto - Controller: 
     async updatedProductController(req, res) {
@@ -162,13 +162,11 @@ export default class ProductController {
                 response.status = "error";
                 response.message = `No se proporcionó ningún ID de producto.`;
                 response.statusCode = 400;
-            }
-            if (!mongoose.Types.ObjectId.isValid(pid)) {
+            } else if (!mongoose.Types.ObjectId.isValid(pid)) {
                 response.status = "error";
                 response.message = `El ID proporcionado no es válido.`;
                 response.statusCode = 400;
-            }
-            if (!updatedFields) {
+            } else if (!updatedFields) {
                 response.status = "error";
                 response.message = `No se proporcionó ningún cuerpo para el producto.`;
                 response.statusCode = 400;

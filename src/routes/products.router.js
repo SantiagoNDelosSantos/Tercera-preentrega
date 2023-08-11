@@ -11,7 +11,7 @@ const productsRouter = Router();
 let productController = new ProductController();
 
 // Crear un producto - Router:
-productsRouter.post('/', async (req,res) => {
+productsRouter.post('/', async (req, res) => {
     const result = await productController.createProductController(req, res);
     res.status(result.statusCode).send(result);
 });

@@ -10,7 +10,7 @@ import cartRouter from './routes/cart.router.js';
 import msmRouter from './routes/message.router.js';
 import productsRouter from './routes/products.router.js';
 import sessionRouter from './routes/session.router.js'
-import viewsRouter from "./routes/views.router.js";
+//import viewsRouter from "./routes/views.router.js";
 
 // Importación de managers:
 import ManagerProducts from './DAO/mongodb/ProductsManager.class.js';
@@ -179,6 +179,6 @@ app.use((req, res, next) => {
 // Rutas:
 app.use('/api/carts/', cartRouter);
 app.use('/api/chat/', msmRouter);
-app.use('/api/realtimeproducts', productsRouter);
+app.use('/api/products', productsRouter);
 app.use('/api/sessions', sessionRouter);
-app.use('/', viewsRouter);
+//app.use('/', viewsRouter);

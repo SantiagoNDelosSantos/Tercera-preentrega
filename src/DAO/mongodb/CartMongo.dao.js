@@ -2,14 +2,10 @@
 import mongoose from "mongoose";
 
 // Import del modelo de carritos:
-import {
-    cartModel
-} from "./models/carts.model.js";
+import { cartModel } from "./models/carts.model.js";
 
 // Import de variables de entorno:
-import {
-    envMongoURL
-} from "../../config.js";
+import { envMongoURL } from "../../config.js";
 
 // Clase para el DAO de carritos:
 export default class CartsDAO {
@@ -77,7 +73,23 @@ export default class CartsDAO {
         }
     }
 
-    // Borrar todos los productos de un carrito: 
+    // Actualizar la cantidad de un produco en carrito - DAO: 
+    async updateProductInCart(cid, pid, updatedProdInCart) {
+        try {
+            const cart = await this.getCartById(cid);
+            const product = cart.products.find((p) => p._id.toString() === pid);
+            if (!product) {
+                throw new Error(`No se encontró ningún producto con el ID ${pid} en el carrito.`);
+            }
+            product.quantity = updatedProdInCart.quantity;
+            await cart.save();
+            return { cart };
+        } catch (error) {
+            throw new Error("Error al actualizar producto en carrito - DAO. Original error: " + error.message);
+        }
+    }
+
+    // Eliminar todos los productos de un carrito: 
     async deleteAllProductsFromCart(cid) {
         try {
             const cart = await this.getCartById(cid);
@@ -90,8 +102,8 @@ export default class CartsDAO {
             throw new Error("Error al borrar todos los productos en carrito - DAO. Original error: " + error.message);
         }
     }
-
-    // Actualizar un carrito:
+    
+    // Actualizar un carrito - DAO:
     async updateCart(cid, updatedCartFields) {
         try {
             let result = await cartModel.updateOne({
@@ -105,18 +117,19 @@ export default class CartsDAO {
         }
     }
 
-    // Actualizar la cantidad de un produco en carrito: 
-    async updateProductToCart(cid, pid, updatedProdInCart) {
+    // Actualizar la cantidad de un produco en carrito - DAO: 
+    async updateProductInCart(cid, pid, updatedProdInCart) {
         try {
             const cart = await this.getCartById(cid);
             const product = cart.products.find((p) => p._id.toString() === pid);
+            if (!product) {
+                throw new Error(`No se encontró ningún producto con el ID ${pid} en el carrito.`);
+            }
             product.quantity = updatedProdInCart.quantity;
             await cart.save();
-            return {
-                cart
-            };
+            return { cart };
         } catch (error) {
-            throw new Error("Error al actualizar producto en carrito. Original error: " + error.message);
+            throw new Error("Error al actualizar producto en carrito - DAO. Original error: " + error.message);
         }
     }
 

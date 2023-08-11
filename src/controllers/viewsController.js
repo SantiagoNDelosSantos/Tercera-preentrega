@@ -1,3 +1,11 @@
+// Import ViewsService:
+import ViewsService from '../services/views.service.js';
+
+
+
+
+
+
 import userModel from '../DAO/mongodb/models/users.model.js';
 import ManagerProducts from '../DAO/mongodb/ProductsManager.class.js';
 import ManagerMessage from '../DAO/mongodb/MessagesManager.class.js';
@@ -7,7 +15,7 @@ const managerProducts = new ManagerProducts();
 const managerMessage = new ManagerMessage();
 const managerCarts = new ManagerCarts();
 
-export const verProductosEnTiempoReal = async (req, res) => {
+export const viewProducts = async (req, res) => {
     try {
         const limit = Number(req.query.limit);
         const page = Number(req.query.page);

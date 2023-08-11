@@ -1,3 +1,4 @@
+/*
 import { Router } from 'express';
 import passport from 'passport';
 
@@ -9,7 +10,7 @@ viewsRouter.get('/cart', (req, res) => {
     res.render('cart', { title: 'Productos' });
 });
 
-viewsRouter.get('/realtimeproducts', verProductosEnTiempoReal);
+viewsRouter.get('/products', verProductosEnTiempoReal);
 
 viewsRouter.get('/chat', verChat);
 
@@ -26,3 +27,5 @@ viewsRouter.get('/api/user', passport.authenticate('jwt', { session: false }), v
 viewsRouter.get('/', passport.authenticate('jwt', { session: false }), verPerfil);
 
 export default viewsRouter;
+
+*/

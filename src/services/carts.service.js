@@ -21,7 +21,7 @@ export default class CartService {
         try {
             const result = await this.cartDao.createCart();
             response.status = "success";
-            response.message = "Cart created successfully.";
+            response.message = "Carrito creado exitosamente.";
             response.result = result;
             response.statusCode = 200;
         } catch (error) {
@@ -40,7 +40,7 @@ export default class CartService {
             const result = await this.cartDao.getCartById(cid);
             if (!result) {
                 response.status = "error";
-                response.message = "Carrito no encontrado.";
+                response.message = `El carrito con ID ${cid}, no se ha encontrado.`;
                 response.statusCode = 404;
             } else {
                 response.status = "success";
@@ -72,7 +72,7 @@ export default class CartService {
                 response.result = result;
                 response.statusCode = 200;
             }
-        } catch (error){
+        } catch (error) {
             response.status = "error";
             response.message = "No se pudo obtener los carritos.";
             response.error = error.message;
@@ -81,96 +81,132 @@ export default class CartService {
         return response;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
     // Agregar un producto a un carrito - Service:
     async addProductToCartService(cid, pid) {
         let response = {}
-        const product = await this.productService.getProductByIdService(pid)
-        const soloProduct = product.result
-        console.log(soloProduct)
-
-
-        const result = await this.cartDao.addProductToCart(cid, soloProduct);
-
-        if (!result) {
-            return {
-                error: "Error no se ha podido agregar el producto al carrito."
-            };
-        } else {
-                response.status = "success";
-                response.message = "Carritos obtenidos exitosamente.";
-                response.result = result;
-                response.statusCode = 200;
+        try {
+            const product = await this.productService.getProductByIdService(pid)
+            if (!product) {
+                response.status = "error";
+                response.message = `No se pudo obtener el producto con ID ${pid}.`;
+                response.statusCode = 404;
+            } else {
+                const soloProduct = product.result
+                const result = await this.cartDao.addProductToCart(cid, soloProduct);
+                if (!result) {
+                    response.status = "error";
+                    response.message = "No fue posible agregar el producto al carrito.";
+                    response.statusCode = 400;
+                } else {
+                    response.status = "success";
+                    response.message = "Carritos obtenidos exitosamente.";
+                    response.result = result;
+                    response.statusCode = 200;
+                }
+            }
+        } catch (error) {
+            response.status = "error";
+            response.message = "No se pudo agregar el producto al carrito.";
+            response.error = error.message;
+            response.statusCode = 500;
         }
-        return  response
+        return response;
     }
 
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Borrar un producto de un carrito: 
+    // Eliminar un producto de un carrito: 
     async deleteProductFromCartService(cid, pid) {
-
-        const product = await this.productsService.getProductsByIdService(pid);
-
-        const result = await this.cartDao.addProductToCart(cid, product);
-
-        if (!result) {
-            return {
-                error: "Error no se ha podido agregar el producto al carrito."
-            };
-        } else {
-            return result;
+        let response = {};
+        try {
+            const result = await this.cartDao.deleteProductFromCart(cid, pid);
+            if (result.deletedCount === 0) {
+                response.status = "error";
+                response.message = `No se encontró ningún producto con el ID ${pid} en el carrito ${cid}`;
+                response.statusCode = 404;
+            } else {
+                response.status = "success";
+                response.message = "Producto eliminado exitosamente.";
+                response.result = result;
+                response.statusCode = 200;
+            }
+        } catch (error) {
+            response.status = "error";
+            response.message = "Error al eliminar el producto.";
+            response.error = error.message;
+            response.statusCode = 500;
         }
+        return response
+    }
+
+    // Eliminar todos los productos de un carrito - Service: 
+    async deleteAllProductFromCartService(cid) {
+        let response = {};
+        try {
+            const result = await this.cartDao.deleteAllProductsFromCart(cid);
+            if (result.n === 0) {
+                response.status = "error";
+                response.message = `No se encontró ningún carrito con el ID ${cid}.`;
+                response.statusCode = 404;
+            } else {
+                response.status = "success";
+                response.message = "Los productos del carrito se han eliminado exitosamente.";
+                response.result = result;
+                response.statusCode = 200;
+            }
+        } catch (error) {
+            response.status = "error";
+            response.message = "Error al eliminar todos los productos del carrito.";
+            response.error = error.message;
+            response.statusCode = 500;
+        }
+        return response;
+    }
+
+    // Actualizar un carrito - Service:
+    async updateCartService(cid, updatedCartFields) {
+        const response = {};
+        try {
+            const result = await this.cartDao.updateCart(cid, updatedCartFields)
+            if (result.n === 0) {
+                response.status = "error";
+                response.message = `No se encontró ningún carrito con el ID ${cid}.`;
+                response.statusCode = 404;
+            } else {
+                response.status = "success";
+                response.message = "Carrito actualizado exitosamente.";
+                response.result = result;
+                response.statusCode = 200;
+            }
+        } catch (error) {
+            response.status = "error";
+            response.message = "Error al actualizar el carrito.";
+            response.error = error.message;
+            response.statusCode = 500;
+        }
+        return response;
+    }
+
+    // Actualizar la cantidad de un producto en carrito - Service:
+    async updateProductInCartService(cid, pid, updatedProdInCart) {
+        let response = {};
+        try {
+            const result = await this.cartDao.updateProductInCart(cid, pid, updatedProdInCart)
+            if (result.n === 0) {
+                response.status = "error";
+                response.message = "No se ha podido actualizar el producto.";
+                response.statusCode = 400;
+            } else {
+                response.status = "success";
+                response.message = "Producto actualizado exitosamente.";
+                response.result = result;
+                response.statusCode = 200;
+            }
+        } catch (error) {
+            response.status = "error";
+            response.message = "Error al actualizar el producto.";
+            response.error = error.message;
+            response.statusCode = 500;
+        }
+        return response;
     }
 
 }
