@@ -18,32 +18,36 @@ export default class MessageController {
     async createMessageController(req, res) {
         let response = {};
         const message = req.body;
-        if (!message) {
-            response.status = "error";
-            response.message = `No se proporcionó ningún cuerpo para el mensaje.`;
-            response.statusCode = 400;
-        } else {
-            const responseService = await this.messageService.createMessageService(message);
-            response.status = responseService.status;
-            response.message = responseService.message;
-            response.statusCode = responseService.statusCode;
-            if (responseService.status === "success") {
-                response.result = responseService.result;
-                // Actualización Real Time:
-                const messages = await this.messageService.getAllMessageService();
-                req.socketServer.sockets.emit('messages', messages);
+        try {
+            if (!message) {
+                response.status = "error";
+                response.message = `No se proporcionó ningún cuerpo para el mensaje.`;
+                response.statusCode = 400;
+            } else {
+                const responseService = await this.messageService.createMessageService(message);
+                response.status = responseService.status;
+                response.message = responseService.message;
+                response.statusCode = responseService.statusCode;
+                if (responseService.status === "success") {
+                    response.result = responseService.result;
+                    // Actualización Real Time:
+                    const messages = await this.messageService.getAllMessageService();
+                    const messageResult = messages.result;
+                    req.socketServer.sockets.emit('messages', messageResult);
+                    console.log(messages, messageResult)
+                };
+                if (responseService.status === "error") {
+                    response.error = responseService.error;
+                };
             };
-            if (responseService.status === "error") {
-                response.error = responseService.error;
-            };
-        };
-        console.log(response);
-        return response
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            error: "Error al crear el mensaje: " + error.message
-        });
+            console.log(response);
+            return response
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.status(500).json({
+                error: "Error al crear el mensaje: " + error.message
+            });
+        }
     }
 
     // Traer todos los mensajes - Controller: 
@@ -93,7 +97,8 @@ export default class MessageController {
                     response.result = responseService.result;
                     // Actualización Real Time:
                     const messages = await this.messageService.getAllMessageService();
-                    req.socketServer.sockets.emit('messages', messages);
+                    const messageResult = messages.result;
+                    req.socketServer.sockets.emit('messages', messageResult);
                 };
                 if (responseService.status === "error") {
                     response.error = responseService.error;

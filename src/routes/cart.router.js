@@ -29,7 +29,7 @@ cartRouter.get('/', async (req, res) => {
 });
 
 // Agregar un producto a un carrito - Router:
-cartRouter.post('/:cid/products/:pid', async (req, res) => {
+cartRouter.post('/:cid/products/:pid/quantity/:quantity', async (req, res) => {
     const result = await cartController.addProductInCartController(req, res);
     res.status(result.statusCode).send(result);
 });

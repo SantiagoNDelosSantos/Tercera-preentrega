@@ -82,7 +82,7 @@ export default class CartService {
     }
 
     // Agregar un producto a un carrito - Service:
-    async addProductToCartService(cid, pid) {
+    async addProductToCartService(cid, pid, quantity) {
         let response = {}
         try {
             const product = await this.productService.getProductByIdService(pid)
@@ -92,14 +92,14 @@ export default class CartService {
                 response.statusCode = 404;
             } else {
                 const soloProduct = product.result
-                const result = await this.cartDao.addProductToCart(cid, soloProduct);
+                const result = await this.cartDao.addProductToCart(cid, soloProduct, quantity);
                 if (!result) {
                     response.status = "error";
                     response.message = "No fue posible agregar el producto al carrito.";
                     response.statusCode = 400;
                 } else {
                     response.status = "success";
-                    response.message = "Carritos obtenidos exitosamente.";
+                    response.message = "Producto agregado al carrito exitosamente.";
                     response.result = result;
                     response.statusCode = 200;
                 }

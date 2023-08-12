@@ -11,7 +11,6 @@ export default class ProductController {
         // Instancia de ProductService:
         this.productService = new ProductService();
     }
-
     // Métodos para ProductController:
 
     // Crear un producto - Controller:
@@ -32,7 +31,7 @@ export default class ProductController {
                     response.result = responseService.result;
                     // Actualización Real Time: 
                     const products = await this.productService.getAllProductsService();
-                    req.socketServer.sockets.emit('productos', products);
+                    req.socketServer.sockets.emit('products', products.result);
                 }
                 if (responseService.status === "error") {
                     response.error = responseService.error;
@@ -42,9 +41,11 @@ export default class ProductController {
             return response
         } catch (error) {
             console.error('Error:', error.message);
-            res.status(500).json({
-                error: "Error al crear el producto: " + error.message
-            });
+            response.status = "error";
+            response.message = "Error al crear el producto: " + error.message;
+            response.error = error.message;
+            response.statusCode = 500;
+            return response;
         }
     };
 
@@ -77,9 +78,11 @@ export default class ProductController {
             return response
         } catch (error) {
             console.error('Error:', error.message);
-            res.status(500).json({
-                error: 'Error al consultar el producto: ' + error.message
-            });
+            response.status = "error";
+            response.message = "Error al consultar el producto:" + error.message;
+            response.error = error.message;
+            response.statusCode = 500;
+            return response;
         }
     };
 
@@ -107,11 +110,13 @@ export default class ProductController {
             console.log(response);
             return response;
         } catch (error) {
-            console.error('Error:', error.message);
-            res.status(500).json({
-                error: "Error al obtener los productos: " + error.message
-            });
-        }
+            console.error('Error: ', error.message);
+            response.status = "error";
+            response.message = "Error al obtener los productos." + error.message;
+            response.error = error.message;
+            response.statusCode = 500;
+            return response;
+        };
     };
 
     // Eliminar un producto por su ID - Controller:
@@ -136,7 +141,7 @@ export default class ProductController {
                     response.result = responseService.result;
                     // Actualización Real Time: 
                     const products = await this.productService.getAllProductsService();
-                    req.socketServer.sockets.emit('productos', products);
+                    req.socketServer.sockets.emit('products', products.result);
                 };
                 if (responseService.status === "error") {
                     response.error = responseService.error;
@@ -146,9 +151,11 @@ export default class ProductController {
             return response
         } catch (error) {
             console.error('Error: ', error.message);
-            res.status(500).json({
-                error: "Error al eliminar el producto: " + error.message
-            });
+            response.status = "error";
+            response.message = "Error al eliminar el producto" + error.message;
+            response.error = error.message;
+            response.statusCode = 500;
+            return response;
         };
     };
 
@@ -179,7 +186,7 @@ export default class ProductController {
                     response.result = responseService.result;
                     // Actualización Real Time: 
                     const products = await this.productService.getAllProductsService();
-                    req.socketServer.sockets.emit('productos', products)
+                    req.socketServer.sockets.emit('products', products.result);
                 }
                 if (responseService.status === "error") {
                     response.error = responseService.error;
@@ -189,9 +196,11 @@ export default class ProductController {
             return response
         } catch (error) {
             console.error('Error: ', error.message);
-            res.status(500).json({
-                error: "Error al eliminar el producto: " + error.message
-            });
+            response.status = "error";
+            response.message = "Error al actualizar el producto:" + error.message;
+            response.error = error.message;
+            response.statusCode = 500;
+            return response;
         }
     }
 

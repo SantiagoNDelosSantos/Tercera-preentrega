@@ -103,7 +103,12 @@ export default class CartController {
         try {
             const cid = req.params.cid;
             const pid = req.params.pid;
-            if (!pid) {
+            const quantity = req.params.quantity; 
+            if(!quantity){
+                response.status = "error";
+                response.message = `No se proporcionó cuantas Unds. del producto se desea comprar.`;
+                response.statusCode = 400;
+            } else if (!pid) {
                 response.status = "error";
                 response.message = `No se proporcionó ningún ID de producto.`;
                 response.statusCode = 400;
@@ -120,7 +125,7 @@ export default class CartController {
                 response.message = `El ID de carrito proporcionado, no es válido.`;
                 response.statusCode = 400;
             } else {
-                const responseService = await this.cartService.addProductToCartService(cid, pid);
+                const responseService = await this.cartService.addProductToCartService(cid, pid, quantity);
                 response.status = responseService.status;
                 response.message = responseService.message;
                 response.statusCode = responseService.statusCode;

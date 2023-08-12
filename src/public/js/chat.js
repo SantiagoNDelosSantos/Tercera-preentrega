@@ -1,73 +1,117 @@
-
 // Iniciar Socket:
 const socket = io();
 
 // Capturas del DOM:
 const chatTable = document.getElementById('chat-table');
 const btnEnviar = document.getElementById('btnEnv');
+const userInput = document.getElementById("usuario");
+const messageInput = document.getElementById("message");
 
 // Escucha el evento "messages" enviado por el servidor
-socket.on("messages", (data) => {
-  let htmlMessages = "";
+socket.on("messages", (messageResult) => {
+  
+  if (messageResult !== null) {
+    
+    let htmlMessages = "";
 
-  // Recorremos los mensajes y los mostramos en el HTML
-  htmlMessages += `
-    <thead>
-      <tr>
-          <th>Usuario</th>
-          <th>Mensaje</th>
-          <th>Eliminar</th>
-      </tr>
-    </thead>`;
-
-  data.forEach((message) => {
+    // Recorremos los mensajes y los mostramos en el HTML
     htmlMessages += `
-    <tbody>
-      <tr>
-        <td>${message.user}</td>
-        <td>${message.message}</td>
-        <td><button type="submit" id=${message.id} class="btnDeleteSMS boton">Eliminar</button></td>
-      </tr>
-    </tbody>`;
-  });
+      <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Mensaje</th>
+            <th>Eliminar</th>
+        </tr>
+      </thead>`;
 
-  // Insertamos los mensajes en el HTML
-  chatTable.innerHTML = htmlMessages;
+    messageResult.forEach((message) => {
+      htmlMessages += `
+      <tbody>
+        <tr>
+          <td>${message.user}</td>
+          <td>${message.message}</td>
+          <td><button type="submit" class="btnDeleteSMS boton" id="Eliminar${message._id}">Eliminar</button></td>
+        </tr>
+      </tbody>`;
+    });
 
-  // Agregar evento click al botón de eliminar
-  const deleteButtonsSMS = document.getElementsByClassName('btnDeleteSMS');
+    // Insertamos los mensajes en el HTML
+    chatTable.innerHTML = htmlMessages;
 
-  for (let button of deleteButtonsSMS) {
-    button.addEventListener("click", () => {
-      socket.emit("deleteMessage", button.getAttribute("id"));
+    // Agregar evento click al botón de eliminar
+    messageResult.forEach((message) => {
+      const deleteButton = document.getElementById(`Eliminar${message._id}`);
+      deleteButton.addEventListener("click", () => {
+        deleteMessage(message._id);
+      });
+    });
+
+  } else {
+    let notMessages = "";
+    notMessages += `<p style="margin-bottom: 1em;">No hay mensajes disponibles.</p>`;
+    chatTable.innerHTML = notMessages;
+    return;
+  }
+
+})
+
+// Eliminar mensajes: 
+
+function deleteMessage(messageId) {
+  if (messageId) {
+    fetch(`/api/chat/${messageId}`, {
+      method: 'DELETE',
+    })
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 5000,
+      title: `Mensaje eliminado.`,
+      icon: 'error'
     });
   }
-});
+}
 
 // Enviar Mensaje:
 
-btnEnviar.addEventListener("click", (e) => {
-  e.preventDefault();
+// Manejador para el evento de enviar mensaje
+btnEnviar.addEventListener("click", () => {
 
-  // Obtenemos los valores de los inputs:
-  const user = document.getElementById("usuario").value;
-  const messageText = document.getElementById("message").value;
+  const user = userInput.value;
+  const messageText = messageInput.value;
 
-  // Validamos que los campos estén completados:
-  if (user === "" || messageText === "") {
-    alert("Todos los campos son obligatorios");
-  } else {
-    // Creamos el mensaje:
-    const message = {
-      user,
-      messageText,
-    };
+  // Crear el objeto de mensaje
+  const message = {
+    user: user,
+    message: messageText,
+  };
 
-    // Enviar el evento "enviarMensaje" al servidor con los datos del mensaje
-    socket.emit("addMessage", message);
+  // Enviar el mensaje al servidor
+  enviarMensajeAlServidor(message);
 
-    // Reseteamos los inputs:
-    document.getElementById("usuario").value = "";
-    document.getElementById("message").value = "";
-  }
+  // Limpiar los campos de entrada
+  userInput.value = "";
+  messageInput.value = "";
 });
+
+// Función para enviar el mensaje al servidor
+function enviarMensajeAlServidor(message) {
+
+  fetch('/api/chat/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(message),
+  })
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 5000,
+    title: `Mensaje enviado.`,
+    icon: 'success'
+  });
+
+}

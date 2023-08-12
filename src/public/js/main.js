@@ -1,7 +1,7 @@
-
 // Iniciar Socket:
 const socket = io();
 
+/*
 // Hacemos una solicitud a la ruta '/api/user' para obtener los datos del usuario
 fetch('/api/user')
 
@@ -20,8 +20,8 @@ fetch('/api/user')
   .catch((error) => {
     console.error('Error al obtener los datos del usuario:', error);
   });
+*/
 
-  
 
 // Capturamos la tabla de productos del DOM:
 const tableProd = document.getElementById('tableProd');
@@ -32,9 +32,9 @@ function allProducts() {
 
   console.log("Primera carga - General")
 
-  socket.on("productos", (data) => {
+  socket.on("products", (products) => {
 
-    const products = data.products;
+    let productos = products;
 
     let htmlProductos = "";
 
@@ -47,11 +47,12 @@ function allProducts() {
           <th>Img Back</th> 
           <th>Stock</th>
           <th>Precio</th>
+          <th>Unds. a comprar</th>
           <th>Cart</th>
       </tr>
     </thead>`;
 
-    products.docs.forEach((product) => {
+    productos.docs.forEach((product) => {
       htmlProductos += `
           <tr>
             <td id="${product.title}">${product.title}</td>
@@ -60,7 +61,8 @@ function allProducts() {
             <td><img src="${product.thumbnails[1]}" alt="${product.title}" class="Imgs"></td>
             <td>${product.stock} Und.</td>
             <td>$${product.price}</td>
-            <td><p class="boton" id="agr${product._id}">+ Cart</p></td>
+            <td><input type="number" id="cantidadInput${product._id}" min="1" max="${product.stock}" value="1"></td>
+            <td><h2 class="boton" id="agr${product._id}">+ Cart</h2></td>
           </tr>`;
 
     });
@@ -74,16 +76,59 @@ function allProducts() {
       const titleElement = document.getElementById(`${product.title}`);
       const title = titleElement.textContent;
 
+
       botonAgregar.addEventListener('click', () => {
-        addToCart(product._id, title);
+        const cantidadInput = document.getElementById(`cantidadInput${product._id}`);
+        const quantity = cantidadInput.value;
+        addToCart(product._id, title, quantity);
       });
+
     });
 
-    function addToCart(productID, title) {
+    function addToCart(productID, title, quantity) {
+
+      console.log(productID, title, quantity);
+
+
+
+      /// oBTENER EL CARRITO DEL USUARIO
+      // OBTENER EL CARRITO DEL USUARIO HDP
+
+      const cartID = "64d4705f0a48cecb30d427f0"; // Cambia esto con el ID de tu carrito
+      const productIDValue = productID;
+
+      if (cartID && productIDValue) {
+        fetch(`/api/carts/${cartID}/products/${productIDValue}/quantity/${quantity}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (quantity && title) {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            title: `${quantity} Unds. de ${title} se ha agregado a tu carrito`,
+            icon: 'success'
+          });
+        }
+      }
+
+    }
+
+
+/*
+    function addToCart(productID, title, quantity) {
+
+      console.log(productID, title, quantity)
 
       fetch('/api/user')
         .then((response) => response.json())
         .then((data) => {
+
           // Aquí recibimos los datos del usuario en la variable 'data'
           let user = data.user;
 
@@ -117,14 +162,27 @@ function allProducts() {
             }
           }
         });
-
     }
+    */
 
   });
 
 }
 
 allProducts()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -168,18 +226,16 @@ filtroVal.addEventListener('change', () => {
   filtrarProducts();
 });
 
-
-
 // Captura div de Pags:
 
 const Pags = document.getElementById('Pags');
 
 // Paginación:
 
-socket.on('productos', (data) => {
+socket.on('products', (products) => {
 
-  const currentPage = data.products.page;
-  const hasNextPage = data.hasNextPage;
+  const currentPage = products.page;
+  const hasNextPage = products.hasNextPage;
 
   let htmlPag = "";
 
